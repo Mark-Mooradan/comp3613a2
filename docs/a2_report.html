@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>COMP 3613 Assignment 2 - Testing Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17241d;
+      --muted: #52645a;
+      --brand: #187342;
+      --brand-soft: #e8f5ed;
+      --line: #d7e2da;
+      --paper: #ffffff;
+      --canvas: #eef3ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.6 "Segoe UI", Arial, sans-serif;
+    }
+
+    main {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 56px 68px;
+      background: var(--paper);
+      box-shadow: 0 12px 40px rgb(23 36 29 / 10%);
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.25;
+      color: var(--ink);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin: 0 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--line);
+      font-size: 1.7rem;
+    }
+
+    h3 {
+      margin: 26px 0 12px;
+      font-size: 1.2rem;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    section {
+      margin-top: 48px;
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      color: var(--brand);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .subtitle,
+    .muted {
+      color: var(--muted);
+    }
+
+    .cover {
+      padding: 28px 0 34px;
+      border-bottom: 4px solid var(--brand);
+    }
+
+    .identity {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+      margin-top: 28px;
+    }
+
+    .identity div {
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdfb;
+    }
+
+    .identity strong {
+      margin-right: 8px;
+      color: var(--brand);
+    }
+
+    .workflow-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 22px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .workflow-list li {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdfb;
+    }
+
+    .workflow-list span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    figure {
+      margin: 22px 0;
+    }
+
+    figure img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .diagram {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fcfefc;
+    }
+
+    .diagram .entity {
+      fill: #fff;
+      stroke: #8eaa96;
+      stroke-width: 2;
+    }
+
+    .diagram .entity-title {
+      fill: #145c36;
+      font: 700 20px "Segoe UI", Arial, sans-serif;
+    }
+
+    .diagram .entity-field {
+      fill: #26372d;
+      font: 15px "Segoe UI", Arial, sans-serif;
+    }
+
+    .diagram .relation {
+      fill: none;
+      stroke: #477a58;
+      stroke-width: 2.5;
+    }
+
+    .diagram .relation-label {
+      fill: #344c3a;
+      font: 14px "Segoe UI", Arial, sans-serif;
+    }
+
+    .test-purpose {
+      padding: 14px 18px;
+      border-left: 4px solid var(--brand);
+      border-radius: 4px;
+      background: var(--brand-soft);
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin: 18px 0 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--brand-soft);
+      color: #174e30;
+      font-weight: 700;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafcfb;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #f0f4f1;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7faf8;
+    }
+
+    a {
+      color: #12663a;
+      overflow-wrap: anywhere;
+    }
+
+    .actual-result {
+      min-width: 100px;
+      color: #146c3a;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .screenshot {
+      margin: 28px 0 36px;
+      break-inside: avoid;
+    }
+
+    .screenshot img {
+      width: 100%;
+      max-height: 760px;
+      object-fit: contain;
+      background: #f6f8f6;
+    }
+
+    .repo-link {
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdfb;
+    }
+
+    .footer {
+      margin-top: 52px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 0;
+      }
+
+      main {
+        padding: 30px 20px;
+      }
+
+      .workflow-list {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        margin-top: 36px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: auto;
+        margin: 16mm;
+      }
+
+      body {
+        padding: 0;
+        background: #fff;
+        font-size: 10.5pt;
+      }
+
+      main {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+      }
+
+      section {
+        margin-top: 30px;
+      }
+
+      h2,
+      h3 {
+        break-after: avoid;
+      }
+
+      figure,
+      .diagram,
+      table,
+      .test-purpose,
+      .repo-link {
+        break-inside: avoid;
+      }
+
+      .table-wrap {
+        overflow: visible;
+      }
+
+      table {
+        font-size: 8.5pt;
+      }
+
+      th,
+      td {
+        padding: 7px;
+      }
+
+      .screenshot img {
+        max-height: 235mm;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="cover">
+      <p class="eyebrow">COMP 3613 · Assignment 2</p>
+      <h1>Testing Report</h1>
+      <p class="subtitle">Student Awards incentive system</p>
+      <div class="identity">
+        <div><strong>Name</strong> Mark Mooradan</div>
+        <div><strong>ID</strong> 816044303</div>
+      </div>
+    </header>
+
+    <section id="project-description">
+      <h2>1. Project Description</h2>
+      <p>
+        Student Awards is an incentive system that lets students log volunteer
+        hours, enables administrators to review and approve or reject those
+        submissions, and allows administrators to create prizes that students
+        can redeem using approved volunteer hours.
+      </p>
+      <p>
+        A student's spendable balance is derived from approved volunteer hours
+        less the cost of recorded redemptions. A redemption requires sufficient
+        approved hours and an available prize quantity.
+      </p>
+      <ol class="workflow-list">
+        <li><strong>Log Volunteer Hours</strong><span>Student</span></li>
+        <li><strong>Approve Volunteer Hours</strong><span>Admin</span></li>
+        <li><strong>Create Prize</strong><span>Admin</span></li>
+        <li><strong>Redeem a Prize</strong><span>Student</span></li>
+      </ol>
+    </section>
+
+    <section id="use-case">
+      <h2>2. Use Case Diagram</h2>
+      <figure>
+        <img src="diagrams/use-case.png" alt="Student Awards use case diagram">
+        <figcaption>Student Awards use case diagram</figcaption>
+      </figure>
+    </section>
+
+    <section id="erd">
+      <h2>3. Entity Relationship Diagram (ERD)</h2>
+      <figure>
+        <svg class="diagram" viewBox="0 0 1200 560" role="img" aria-labelledby="erd-title erd-description" xmlns="http://www.w3.org/2000/svg">
+          <title id="erd-title">Student Awards entity relationship diagram</title>
+          <desc id="erd-description">A Student has many VolunteerEntry and Redemption records. A Prize can appear in many Redemption records.</desc>
+          <path class="relation" d="M330 158 H445"/>
+          <text class="relation-label" x="336" y="146">1</text>
+          <text class="relation-label" x="420" y="146">0..*</text>
+          <text class="relation-label" x="350" y="179">submits</text>
+
+          <path class="relation" d="M330 296 C500 304 650 313 825 333"/>
+          <text class="relation-label" x="350" y="292">1</text>
+          <text class="relation-label" x="799" y="329">0..*</text>
+          <text class="relation-label" x="548" y="309">makes</text>
+
+          <path class="relation" d="M795 437 C813 424 817 413 838 397"/>
+          <text class="relation-label" x="798" y="456">1</text>
+          <text class="relation-label" x="827" y="409">0..*</text>
+          <text class="relation-label" x="786" y="414">selected_for</text>
+
+          <g>
+            <rect class="entity" x="30" y="75" width="300" height="300" rx="10"/>
+            <text class="entity-title" x="50" y="110">Student</text>
+            <line x1="30" y1="126" x2="330" y2="126" stroke="#d7e2da"/>
+            <text class="entity-field" x="50" y="157">unspecified name</text>
+            <text class="entity-field" x="50" y="187">unspecified email</text>
+            <text class="entity-field" x="50" y="217">unspecified username</text>
+            <text class="entity-field" x="50" y="247">derived approved_hours</text>
+          </g>
+
+          <g>
+            <rect class="entity" x="445" y="35" width="350" height="245" rx="10"/>
+            <text class="entity-title" x="465" y="70">VolunteerEntry</text>
+            <line x1="445" y1="86" x2="795" y2="86" stroke="#d7e2da"/>
+            <text class="entity-field" x="465" y="115">unspecified student_id (FK)</text>
+            <text class="entity-field" x="465" y="143">unspecified activity_name</text>
+            <text class="entity-field" x="465" y="171">unspecified organization</text>
+            <text class="entity-field" x="465" y="199">unspecified hours</text>
+            <text class="entity-field" x="465" y="227">unspecified date, status</text>
+          </g>
+
+          <g>
+            <rect class="entity" x="445" y="355" width="350" height="165" rx="10"/>
+            <text class="entity-title" x="465" y="390">Prize</text>
+            <line x1="445" y1="406" x2="795" y2="406" stroke="#d7e2da"/>
+            <text class="entity-field" x="465" y="435">unspecified name, description</text>
+            <text class="entity-field" x="465" y="463">unspecified cost_in_hours</text>
+            <text class="entity-field" x="465" y="491">unspecified quantity_available</text>
+          </g>
+
+          <g>
+            <rect class="entity" x="825" y="235" width="345" height="210" rx="10"/>
+            <text class="entity-title" x="845" y="270">Redemption</text>
+            <line x1="825" y1="286" x2="1170" y2="286" stroke="#d7e2da"/>
+            <text class="entity-field" x="845" y="318">int student_id (FK)</text>
+            <text class="entity-field" x="845" y="348">int prize_id (FK)</text>
+            <text class="entity-field" x="845" y="378">datetime redeemed_at</text>
+          </g>
+        </svg>
+        <figcaption>
+          Relationships and attributes reproduced from the A1 model diagram.
+          <span class="muted">1 to 0..* indicates one parent record may have many related records.</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="wireframes">
+      <h2>4. Application Wireframes</h2>
+      <figure>
+        <img src="wireframes/log-hours.png" alt="Log Volunteer Hours wireframe">
+        <figcaption>Log Volunteer Hours</figcaption>
+      </figure>
+      <figure>
+        <img src="wireframes/approve-hours.png" alt="Approve Volunteer Hours wireframe">
+        <figcaption>Approve Volunteer Hours</figcaption>
+      </figure>
+      <figure>
+        <img src="wireframes/create-prize.png" alt="Create Prize wireframe">
+        <figcaption>Create Prize</figcaption>
+      </figure>
+      <figure>
+        <img src="wireframes/redeem-prize.png" alt="Redeem a Prize wireframe">
+        <figcaption>Redeem a Prize</figcaption>
+      </figure>
+    </section>
+
+    <section id="test-plans">
+      <h2>5. Assignment 2 Test Plans</h2>
+      <p>
+        The plans cover the Student Awards incentive system's four workflows.
+        The workflow pages are HTML forms; their POST routes accept
+        form-encoded data and respond with redirects. <code>/health</code> and
+        <code>/api/users</code> are JSON endpoints.
+      </p>
+
+      <h3>5.1 Unit Test Plan</h3>
+      <p class="test-purpose">
+        <strong>Purpose:</strong> Verify each domain service in isolation.
+        Repository objects are mocked so the tests check service decisions and
+        repository calls without a database, HTTP request, or template.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Service / behavior</th>
+              <th>Test data and action</th>
+              <th>Expected result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>UT-01</td><td>Submit volunteer hours</td><td>Submit a student's activity, organization, hours, and date.</td><td>A <code>VolunteerEntry</code> with the supplied values and <code>Pending</code> status is passed to the repository and returned.</td></tr>
+            <tr><td>UT-02</td><td>Review volunteer hours</td><td>Review an entry with a whitespace-padded, mixed-case <code>approve</code> action.</td><td>The service normalizes the action and asks the repository to set <code>Approved</code>.</td></tr>
+            <tr><td>UT-03</td><td>Reject invalid review action</td><td>Submit an action other than <code>approve</code> or <code>reject</code>.</td><td>A <code>ValueError</code> is raised and no repository update is made.</td></tr>
+            <tr><td>UT-04</td><td>Review missing/already-decided entry</td><td>Repository returns no updated entry.</td><td>A <code>ValueError</code> explains that the entry is missing or already decided.</td></tr>
+            <tr><td>UT-05</td><td>Create prize</td><td>Supply name, description, hours cost, and inventory.</td><td>The service creates a <code>Prize</code>, delegates it to the repository, and returns it.</td></tr>
+            <tr><td>UT-06</td><td>Load rewards</td><td>Repository provides a balance and prize list.</td><td>The service returns both values unchanged for the requesting student.</td></tr>
+            <tr><td>UT-07</td><td>Redeem eligible prize</td><td>Prize exists, has inventory, balance covers its cost, and inventory update succeeds.</td><td>The prize is returned and one redemption/inventory update is requested for that student and prize.</td></tr>
+            <tr><td>UT-08</td><td>Reject invalid redemption</td><td>Try a missing prize, an out-of-stock prize, a balance below cost, or an inventory update that loses a race.</td><td>Each case raises the corresponding <code>ValueError</code>; no redemption is recorded for missing, out-of-stock, or unaffordable prizes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Execution:</strong> <code>pytest tests/test_unit.py</code></p>
+
+      <h3>5.2 Integration Test Plan</h3>
+      <p class="test-purpose">
+        <strong>Purpose:</strong> Exercise the actual FastAPI routes,
+        authentication, templates, service/repository wiring, and persisted
+        database effects. Tests use an in-memory SQLite database and replace
+        the session dependency; they do not connect to the configured
+        development or production database.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Route(s) / workflow</th>
+              <th>Setup and action</th>
+              <th>Expected result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>IT-01</td>
+              <td><code>GET /health</code>, <code>GET /api/users</code></td>
+              <td>Request both endpoints against a database containing test student and admin accounts.</td>
+              <td>Health returns <code>{"ok": true}</code>; users returns the expected public fields and does not expose passwords.</td>
+            </tr>
+            <tr>
+              <td>IT-02</td>
+              <td><code>GET, POST /volunteer-hours</code>; <code>GET, POST /admin/volunteer-hours/{id}/review</code></td>
+              <td>Log in as student, submit a dated entry, then log in as admin and reject it.</td>
+              <td>Form pages render, POSTs redirect, the entry is initially <code>Pending</code>, the admin sees it, and rejection persists as <code>Rejected</code> and removes it from the pending list. A student is denied the admin page.</td>
+            </tr>
+            <tr>
+              <td>IT-03</td>
+              <td><code>POST /login</code>; <code>POST /admin/volunteer-hours/{id}/review</code>; <code>GET, POST /admin/prizes/new</code>; <code>GET /rewards</code>; <code>POST /rewards/{id}/redeem</code></td>
+              <td>Submit 6.5 hours as a student, approve them as admin, create prizes costing 5 and 7 hours, then try the unaffordable prize and redeem the affordable one. Retry the redeemed prize after its inventory reaches zero.</td>
+              <td>The reward page shows the derived 6.5-hour balance. The unaffordable attempt leaves inventory and redemptions unchanged and displays a failure message. Successful redemption records one row, decrements inventory, displays a success message, and refreshes the balance to 1.5 hours. A second attempt reports out-of-stock.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Execution:</strong> <code>pytest tests/test_integration.py</code></p>
+
+      <h3>5.3 User Acceptance Test (UAT) Plan</h3>
+      <p class="test-purpose">
+        <strong>Purpose:</strong> Have a student and admin confirm that each
+        named workflow can be completed and that the visible outcome agrees
+        with the wireframes and stated business rules.
+      </p>
+      <p><strong>Environment and test accounts</strong></p>
+      <ul>
+        <li>Run the application against a disposable test database with the current schema and one student and one admin account.</li>
+        <li>Use a browser or the matching requests in the Postman collection; test as both roles.</li>
+        <li>Record each case as Pass, Fail, or Blocked, with the observed result and any defect reference.</li>
+      </ul>
+
+      <h3>5.4 Completed UAT Results</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Workflow / role</th>
+              <th>Preconditions and steps</th>
+              <th>Acceptance criteria</th>
+              <th>Actual Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>UAT-01</td>
+              <td>Log Volunteer Hours — Student</td>
+              <td>Sign in as a student. Open Log Hours, enter an activity, organization, positive hours, and date, then submit.</td>
+              <td>The form is usable and the student sees confirmation that the entry is pending approval. The submitted values appear in the admin's pending-review list with <code>Pending</code> status.</td>
+              <td class="actual-result">Pass</td>
+            </tr>
+            <tr>
+              <td>UAT-02</td>
+              <td>Approve Volunteer Hours — Admin</td>
+              <td>Sign in as admin. Open the review list for a pending student entry and choose Approve. Repeat with another pending entry and choose Reject.</td>
+              <td>Each decision shows its outcome. Decided entries disappear from the pending list; approved hours contribute to the student's spendable balance, while rejected hours do not.</td>
+              <td class="actual-result">Pass</td>
+            </tr>
+            <tr>
+              <td>UAT-03</td>
+              <td>Create Prize — Admin</td>
+              <td>Sign in as admin. Open the prize form and enter a name, description, cost in hours, and available quantity. Submit.</td>
+              <td>A creation confirmation appears. The prize appears on the student rewards page with the entered cost and quantity.</td>
+              <td class="actual-result">Pass</td>
+            </tr>
+            <tr>
+              <td>UAT-04</td>
+              <td>Redeem a Prize — Student</td>
+              <td>Sign in as a student with enough approved hours. View Rewards, redeem an in-stock affordable prize, then attempt an unaffordable or out-of-stock prize.</td>
+              <td>The successful redemption confirms, reduces the balance by the prize cost, decreases quantity by one, and is reflected when Rewards is refreshed. Invalid attempts explain the reason and do not change balance or inventory.</td>
+              <td class="actual-result">Pass</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>UAT Exit Criteria</h3>
+      <ul>
+        <li>All four workflows are accepted by their intended roles.</li>
+        <li>No unresolved critical or high-severity issue prevents a workflow from completing.</li>
+        <li>Any failed or blocked case has an owner and retest result recorded.</li>
+      </ul>
+
+      <h3>Running the Automated Tests</h3>
+      <p>From the repository root, run:</p>
+      <pre><code>pytest</code></pre>
+      <p>
+        The project pytest configuration is in <code>pyproject.toml</code>.
+        Integration tests use only in-memory SQLite and can run without
+        resetting the application's database.
+      </p>
+    </section>
+
+    <section id="repository">
+      <h2>6. GitHub Repository</h2>
+      <p class="repo-link">
+        <a href="https://github.com/Mark-Mooradan/comp3613a2">
+          https://github.com/Mark-Mooradan/comp3613a2
+        </a>
+      </p>
+    </section>
+
+    <section id="reports">
+      <h2>7. Reports</h2>
+      <figure class="screenshot">
+        <img src="a2_screenshots/pytest1.png" alt="Pytest report screenshot 1">
+        <figcaption>Pytest report 1</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="a2_screenshots/pytest2.png" alt="Pytest report screenshot 2">
+        <figcaption>Pytest report 2</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="a2_screenshots/postman1.png" alt="Postman report screenshot 1">
+        <figcaption>Postman report 1</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="a2_screenshots/postman2.png" alt="Postman report screenshot 2">
+        <figcaption>Postman report 2</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="a2_screenshots/postman3.png" alt="Postman report screenshot 3">
+        <figcaption>Postman report 3</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="a2_screenshots/postman4.png" alt="Postman report screenshot 4">
+        <figcaption>Postman report 4</figcaption>
+      </figure>
+    </section>
+
+    <footer class="footer">
+      COMP 3613 Assignment 2 · Student Awards
+    </footer>
+  </main>
+</body>
+</html>

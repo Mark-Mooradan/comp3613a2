@@ -1,0 +1,689 @@
+{
+  "info": {
+    "_postman_id": "f5a14c8a-d673-4505-a3b2-958a1b3f67d1",
+    "name": "COMP 3613 A2 - Student Awards Copy 2",
+    "description": "Run in order against a disposable local database initialized with the demo bob/admin accounts. Authenticated requests explicitly send the cookie captured by the preceding role login. The HTML form routes redirect; ID lookup requests parse the created records from their HTML lists.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58618699",
+    "_collection_link": "https://go.postman.co/collection/58618699-f5a14c8a-d673-4505-a3b2-958a1b3f67d1?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Health and JSON API",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('health endpoint returns healthy JSON', function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.json()).to.eql({ ok: true });\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('users endpoint returns public user data', function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.json()).to.be.an('array');\n    pm.response.json().forEach(function (user) {\n        pm.expect(user).to.have.all.keys('id', 'username', 'email');\n    });\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Log and approve volunteer hours",
+      "item": [
+        {
+          "name": "Open volunteer-hours form",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('student can open the log-hours form', function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.text()).to.include('Log Volunteer Hours');\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "volunteer-hours"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record starting rewards balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('student rewards page displays a balance', function () {\n    pm.response.to.have.status(200);\n    const match = pm.response.text().match(/Your Balance:\\s*([\\d.]+)\\s*Hours/);\n    pm.expect(match, 'balance shown in hours').not.to.be.null;\n    if (match) { pm.collectionVariables.set('startingBalance', match[1]); }\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rewards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rewards"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Volunteer Hours",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('activityName', 'Postman Activity ' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('volunteer-hours form submission redirects', function () {\n    pm.response.to.have.status(303);\n    pm.expect(pm.response.headers.get('Location')).to.include('/volunteer-hours');\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "activity_name",
+                  "value": "{{activityName}}"
+                },
+                {
+                  "key": "organization",
+                  "value": "Postman Test Organization"
+                },
+                {
+                  "key": "hours",
+                  "value": "20"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-10-28"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "volunteer-hours"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin login redirects successfully', function () {\n    pm.response.to.have.status(303);\n});\nconst setCookie = pm.response.headers.get('Set-Cookie') || '';\nconst cookieMatch = setCookie.match(/(?:^|,\\s*)(access_token=[^;,\\s]+)/);\npm.test('admin session cookie is captured', function () {\n    pm.expect(cookieMatch, 'access_token cookie').not.to.be.null;\n});\nif (cookieMatch) { pm.collectionVariables.set('sessionCookie', cookieMatch[1]); }"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{adminUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{adminPassword}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Find submitted entry ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin sees the submitted pending entry', function () {\n    pm.response.to.have.status(200);\n});\nconst html = pm.response.text();\nconst activity = pm.collectionVariables.get('activityName');\nconst activityIndex = html.indexOf(activity);\nconst rowStart = html.lastIndexOf('<tr', activityIndex);\nconst rowEnd = html.indexOf('</tr>', activityIndex);\nconst row = activityIndex >= 0 ? html.slice(rowStart, rowEnd) : '';\nconst entryMatch = row.match(/\\/admin\\/volunteer-hours\\/(\\d+)\\/review/);\npm.test('submitted entry ID is extracted from the review link', function () {\n    pm.expect(html).to.include(activity);\n    pm.expect(entryMatch, 'entry review route').not.to.be.null;\n});\nif (entryMatch) { pm.collectionVariables.set('entryId', entryMatch[1]); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "volunteer-hours"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve volunteer hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('approval redirects to the admin review list', function () {\n    pm.response.to.have.status(303);\n    pm.expect(pm.response.headers.get('Location')).to.include('/admin/volunteer-hours');\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "action",
+                  "value": "approve"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/volunteer-hours/{{entryId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "volunteer-hours",
+                "{{entryId}}",
+                "review"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Prize",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('prizeName', 'Postman Reward ' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('prize creation redirects to the admin form', function () {\n    pm.response.to.have.status(303);\n    pm.expect(pm.response.headers.get('Location')).to.include('/admin/prizes/new');\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "{{prizeName}}"
+                },
+                {
+                  "key": "description",
+                  "value": "Created by the Postman workflow test"
+                },
+                {
+                  "key": "cost_in_hours",
+                  "value": "3.5"
+                },
+                {
+                  "key": "quantity_available",
+                  "value": "2"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/prizes/new",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "prizes",
+                "new"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Student for rewards",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('student login for rewards redirects successfully', function () {\n    pm.response.to.have.status(303);\n});\nconst setCookie = pm.response.headers.get('Set-Cookie') || '';\nconst cookieMatch = setCookie.match(/(?:^|,\\s*)(access_token=[^;,\\s]+)/);\npm.test('student session cookie is captured', function () {\n    pm.expect(cookieMatch, 'access_token cookie').not.to.be.null;\n});\nif (cookieMatch) { pm.collectionVariables.set('sessionCookie', cookieMatch[1]); }"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{studentUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{studentPassword}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Find created prize ID and check balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('student sees the approved-hours balance and prize', function () {\n    pm.response.to.have.status(200);\n});\nconst html = pm.response.text();\nconst balanceMatch = html.match(/Your Balance:\\s*([\\d.]+)\\s*Hours/);\npm.test('approved volunteer hours are reflected in balance', function () {\n    pm.expect(balanceMatch, 'balance shown in hours').not.to.be.null;\n    if (balanceMatch) {\n        const expectedBalance = Number(pm.collectionVariables.get('startingBalance')) + 20;\n        pm.expect(Number(balanceMatch[1])).to.be.closeTo(expectedBalance, 0.01);\n    }\n});\nconst prizeName = pm.collectionVariables.get('prizeName');\nconst prizeIndex = html.indexOf(prizeName);\nconst rowStart = html.lastIndexOf('<tr', prizeIndex);\nconst rowEnd = html.indexOf('</tr>', prizeIndex);\nconst row = prizeIndex >= 0 ? html.slice(rowStart, rowEnd) : '';\nconst prizeMatch = row.match(/\\/rewards\\/(\\d+)\\/redeem/);\npm.test('created prize ID is extracted from its redeem link', function () {\n    pm.expect(prizeIndex, 'created prize listed').to.be.above(-1);\n    pm.expect(prizeMatch, 'prize redeem route').not.to.be.null;\n});\nif (prizeMatch) { pm.collectionVariables.set('prizeId', prizeMatch[1]); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rewards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rewards"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem prize",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('redemption redirects to rewards', function () {\n    pm.response.to.have.status(303);\n    pm.expect(pm.response.headers.get('Location')).to.include('/rewards');\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rewards/{{prizeId}}/redeem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rewards",
+                "{{prizeId}}",
+                "redeem"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify redemption",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('successful redemption changes balance and inventory', function () {\n    pm.response.to.have.status(200);\n    const html = pm.response.text();\n    const balanceMatch = html.match(/Your Balance:\\s*([\\d.]+)\\s*Hours/);\n    pm.expect(balanceMatch, 'updated balance shown in hours').not.to.be.null;\n    if (balanceMatch) {\n        const expectedBalance = Number(pm.collectionVariables.get('startingBalance')) + 16.5;\n        pm.expect(Number(balanceMatch[1])).to.be.closeTo(expectedBalance, 0.01);\n    }\n    const prizeIndex = html.indexOf(pm.collectionVariables.get('prizeName'));\n    const rowEnd = html.indexOf('</tr>', prizeIndex);\n    const row = prizeIndex >= 0 ? html.slice(prizeIndex, rowEnd) : '';\n    pm.expect(row).to.include('<td>1</td>');\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rewards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rewards"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login - Student",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('student login redirects successfully', function () {\n    pm.response.to.have.status(303);\n});\nconst setCookie = pm.response.headers.get('Set-Cookie') || '';\nconst cookieMatch = setCookie.match(/(?:^|,\\s*)(access_token=[^;,\\s]+)/);\npm.test('student session cookie is captured', function () {\n    pm.expect(cookieMatch, 'access_token cookie').not.to.be.null;\n});\nif (cookieMatch) { pm.collectionVariables.set('sessionCookie', cookieMatch[1]); }"
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{studentUsername}}"
+            },
+            {
+              "key": "password",
+              "value": "{{studentPassword}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5000",
+      "type": "string"
+    },
+    {
+      "key": "studentUsername",
+      "value": "bob",
+      "type": "string"
+    },
+    {
+      "key": "studentPassword",
+      "value": "bobpass",
+      "type": "string"
+    },
+    {
+      "key": "adminUsername",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "adminpass",
+      "type": "string"
+    },
+    {
+      "key": "sessionCookie",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "entryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "prizeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "prizeName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "activityName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "startingBalance",
+      "value": "0",
+      "type": "string"
+    }
+  ]
+}
